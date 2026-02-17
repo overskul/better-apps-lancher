@@ -1,0 +1,35 @@
+{
+  "id": "acode.plugin.template",
+  "name": "acode plugin template",
+  "version": "0.0.1",
+
+  "entry": "src/main.js",
+  "output": "dist/Template.js",
+  "zip": "{id}-{version}.acodeplugin",
+
+  "readme": "readme.md",
+  "icon": "assets/plugin-icon.png",
+  "license": "MIT",
+  "changelog": "changelog.md",
+
+  "files": [
+    "./assets"
+  ],
+  "Keywords": [
+    "Template",
+    "Plugin"
+  ],
+
+  "price": 0,
+  "minVersionCode": 965,
+
+  "repository": "REPO_URL",
+  "author": {
+    "name": "USER_NAME",
+    "email": "EMAIL",
+    "url": "URL",
+    "github": "USER_NAME"
+  },
+
+  "contributors": []
+}

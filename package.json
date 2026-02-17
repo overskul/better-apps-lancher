@@ -1,0 +1,16 @@
+{
+  "type": "module",
+  "acode-plugin": "plugin.json",
+  "dependencies": {
+    "@types/ace": "^0.0.50",
+    "html-tag-js": "^1.1.41"
+  },
+  "devDependencies": {
+    "archiver": "^7.0.1",
+    "esbuild": "^0.24.0"
+  },
+  "scripts": {
+    "dev": "node build/esbuild.config.js --serve",
+    "build": "node build/esbuild.config.js"
+  }
+}
