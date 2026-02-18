@@ -1,0 +1,140 @@
+.better-apps-launcher .header {
+  display: flex;
+  align-items: center;
+  flex-direction: row !important;
+  flex-wrap: nowrap;
+  width: 100%;
+  height: 2rem;
+  font-weight: 600;
+  background-color: var(--secondary-color);
+  padding: 0 .8rem;
+  box-sizing: border-box;
+}
+
+.better-apps-launcher .header .title {
+  display: flex;
+  align-items: center;
+  justify-content: start !important;
+  height: 100%;
+  width: 100%;
+  flex: 1;
+}
+
+.better-apps-launcher .header .options {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  gap: .25rem;
+  flex-shrink: 0; 
+}
+
+.better-apps-launcher .header .options .option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 1rem;
+  width: 1rem;
+  border-radius: .25rem;
+}
+
+.better-apps-launcher .header .options .option.active {
+  background: var(--active-color);
+}
+
+.better-apps-launcher .apps-list {
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  padding: .5rem;
+  gap: .25rem;
+  list-style: none;
+}
+
+.better-apps-launcher .apps-list li:not([is-floating="true"]) {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  height: 3rem;
+  width: 3rem;
+}
+
+.better-apps-launcher .apps-list li:not([is-floating="true"]) .app-icon {
+  border-radius: .5rem;
+  height: 2.5rem;
+  width: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.better-apps-launcher .apps-list li:not([is-floating="true"]) .app-icon::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255,255,255,0.18);
+  opacity: .5;
+  pointer-events: none;
+}
+
+.better-apps-launcher .apps-list li:not([is-floating="true"]) .app-label {
+  display: block;
+  width: 100%;
+  height: 100%;
+  font-size: .5rem;
+  line-height: 1.2;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+  padding: 0.2rem;
+  margin: auto;
+}
+
+.better-apps-launcher .apps-list li.new-app[is-floating="false"] .app-icon {
+  border-color: rgb(from var(--active-color) r g b / 0.5);
+  color: var(--active-color);
+  font-size: 1.25rem;
+  background: radial-gradient(
+    circle,
+    rgba(0, 0, 0, 0) 5%,
+    rgb(from var(--active-color) r g b / 0.25)
+  );
+}
+
+.better-apps-launcher .apps-list li.new-app[is-floating="false"] .app-label {
+  opacity: 0;
+}
+
+.better-apps-launcher .apps-list li.new-app[is-floating="true"] {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+
+  width: 3rem;
+  height: 3rem;
+  border-radius: .5rem;
+
+  border: none;
+  background: var(--active-color);
+  color: white;
+  font-size: 1.25rem;
+  cursor: pointer;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

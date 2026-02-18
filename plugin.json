@@ -1,34 +1,35 @@
 {
-  "id": "acode.plugin.template",
-  "name": "acode plugin template",
+  "id": "x.better.appslauncher",
+  "name": "Better Apps Launcher",
   "version": "0.0.1",
 
   "entry": "src/main.js",
-  "output": "dist/Template.js",
+  "output": "dist/BetterAppsLauncher.js",
   "zip": "{id}-{version}.acodeplugin",
 
   "readme": "readme.md",
   "icon": "assets/plugin-icon.png",
-  "license": "MIT",
+  "license": "gpl-2.0",
   "changelog": "changelog.md",
 
   "files": [
     "./assets"
   ],
   "Keywords": [
-    "Template",
-    "Plugin"
+    "apps",
+    "app",
+    "apk",
+    "launcher",
+    "better"
   ],
 
   "price": 0,
   "minVersionCode": 965,
 
-  "repository": "REPO_URL",
+  "repository": "https://github.com/overskul/better-apps-lancher",
   "author": {
-    "name": "USER_NAME",
-    "email": "EMAIL",
-    "url": "URL",
-    "github": "USER_NAME"
+    "name": "overskul",
+    "github": "overskul"
   },
 
   "contributors": []
