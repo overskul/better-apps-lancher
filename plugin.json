@@ -9,7 +9,7 @@
 
   "readme": "readme.md",
   "icon": "assets/plugin-icon.png",
-  "license": "gpl-2.0",
+  "license": "MIT",
   "changelog": "changelog.md",
 
   "files": [
