@@ -47,14 +47,10 @@ Tap any app icon in the launcher panel to open it immediately.
 | Sort A–Z | Toggles alphabetical sorting of apps |
 | Floating | Toggles the floating position of the "New App" button |
 
----
-
 ## Permissions
 
-This plugin uses Android shell commands via `Executor` to query installed packages and resolve app activities. It requires equivalent shell execution environment to be available in Acode.
-
----
+This plugin uses Android shell commands via `Executor` to query installed packages and resolve app activities. It requires an equivalent shell execution environment to be available in Acode. Note that not all installed apps may appear in the list — this depends on your device, Android version, and whether the app exposes a launcher activity. Apps without a launcher intent (background services, system components, etc.) will not show up. App icons are also not displayed, as reliably fetching them across all devices and Android versions is not straightforward.
 
 ## License
 
-[GPL-2.0](https://github.com/overskul/better-apps-lancher/blob/main/LICENSE) © Better Apps Launcher
+[MIT](https://github.com/overskul/better-apps-lancher/blob/main/LICENSE) © Better Apps Launcher

@@ -50,13 +50,6 @@ export class BetterAppsLauncher {
     delete localStorage.__$better_apps_launcher$_config;
   }
 
-  get pSettings() {
-    return {
-      list: [],
-      cb: (key, value) => {}
-    };
-  }
-  
   get config() {
     return this._config;
   }
@@ -235,7 +228,6 @@ export class BetterAppsLauncher {
     let activity = await this.getPackageActivity(packageName);
     if (!activity) return;
 
-    activity = activity.replace("/.", ".").slice(activity.lastIndexOf("com"));
     this.config.shortcutApps.push({
       packageName: packageName,
       mainActivity: activity,
@@ -246,12 +238,30 @@ export class BetterAppsLauncher {
   }
 
   async getInstallAppsList() {
-    const packages = await Executor.execute("cmd package query-activities --user 0 --brief -a android.intent.action.MAIN -c android.intent.category.LAUNCHER | awk -F/ 'NF==2 {print $1}'");
+    const packages = await Executor.BackgroundExecutor.execute("cmd package query-activities --user 0 --brief -a android.intent.action.MAIN -c android.intent.category.LAUNCHER | awk -F/ 'NF==2 {print $1}'");
     return packages.split("\n").map(p => p.trim());
   }
 
   async getPackageActivity(pack) {
-    const activity = await Executor.execute(`cmd package resolve-activity --user 0 --brief ${pack}`);
-    return activity.split("\n").pop();
+    const activity = await Executor.BackgroundExecutor.execute(`cmd package resolve-activity --user 0 --brief ${pack}`, true);
+    return this.resolveActivity(activity.split("\n").pop());
+  }
+  
+  resolveActivity(activity) {
+    activity = activity.trim();
+
+    const slashIndex = activity.indexOf("/");
+    if (slashIndex === -1) return activity;
+
+    const packageName = activity.slice(0, slashIndex);
+    let className = activity.slice(slashIndex + 1);
+
+    if (className.startsWith(".")) {
+      className = packageName + className;
+    } else if (!className.includes(".")) {
+      className = packageName + "." + className;
+    }
+    return className;
   }
 }
+
