@@ -8,6 +8,7 @@ const sideBarApps = acode.require('sidebarApps');
 const Select = acode.require('select');
 const Prompt = acode.require('prompt');
 const fs = acode.require('fs');
+const FileBrowser = acode.require('fileBrowser');
 
 export class BetterAppsLauncher {
   static SIDEBAR_APP_ID = "better-apps-launcher";
@@ -15,6 +16,7 @@ export class BetterAppsLauncher {
   static STYLE_ID = "better-apps-launcher-style";
   static DEFAULT_CONFIG = {
     sortAlphabet: false,
+    hideLabels: false,
     floatingNewApp: false,
     shortcutApps: []
   };
@@ -47,6 +49,7 @@ export class BetterAppsLauncher {
   async destroy() {
     this.$style.remove();
     sideBarApps.remove(BetterAppsLauncher.SIDEBAR_APP_ID);
+    this.config.shortcutApps.forEach(async (_, i) => await this.removeApp(i));
     delete localStorage.__$better_apps_launcher$_config;
   }
 
@@ -71,11 +74,12 @@ export class BetterAppsLauncher {
     localStorage.__$better_apps_launcher$_config = JSON.stringify(this._config);
   }
 
-  onInitSidebarApp(container) {
+  async onInitSidebarApp(container) {
     this.$container = container;
     this.$container.classList.add(BetterAppsLauncher.SIDEBAR_APP_ID);
     this.$container.innerHTML = _c$Container
       .replace("{s-active}", this.config.sortAlphabet ? "active" : "")
+      .replace("{h-active}", this.config.hideLabels ? "active" : "")
       .replace("{f-active}", this.config.floatingNewApp ? "active" : "");
 
     this.$container.addEventListener("click", this.onClickApp.bind(this));
@@ -86,31 +90,37 @@ export class BetterAppsLauncher {
     this.$container.addEventListener("mouseup", this.onHoldEnd.bind(this));
 
     const $appsList = this.$container.querySelector(".apps-list");
-    $appsList.innerHTML = this.getAppsList();
+    $appsList.setAttribute("hide-labels", this.config.hideLabels ? "active" : "");
+    $appsList.innerHTML = await this.getAppsList();
   }
 
-  onSelectSidebarApp(container) {
+  async onSelectSidebarApp(container) {
     const $appsList = this.$container.querySelector(".apps-list");
-    $appsList.innerHTML = this.getAppsList();
+    $appsList.setAttribute("hide-labels", this.config.hideLabels ? "active" : "");
+    $appsList.innerHTML = await this.getAppsList();
   }
 
-  getAppsList() {
-    return [...this.config.shortcutApps]
-      .sort((a, b) => {
-        if (!this.config.sortAlphabet) return 0;
-        return a.label.localeCompare(b.label);
-      })
-      .map(app => this.getAppElement(app))
-      .join("") + 
-      _c$NewApp
-      .replace("{floating}", this.config.floatingNewApp);
+  async getAppsList() {
+    const sorted = [...this.config.shortcutApps].sort((a, b) => {
+      if (!this.config.sortAlphabet) return 0;
+      return a.label.localeCompare(b.label);
+    });
+
+    const appElements = await Promise.all(sorted.map(this.getAppElement.bind(this)));
+    return appElements.join("") + _c$NewApp.replace("{floating}", this.config.floatingNewApp);
   }
 
-  getAppElement(app) {
+  async getAppElement(app) {
     return _c$App
       .replace("{package-name}", app.packageName)
       .replace("{main-activity}", app.mainActivity)
-      .replace("{icon}", app.icon)
+      .replace(
+        "{has-icon}", 
+        app.icon
+          ? '<img class="app-icon" src="{icon}" /><span class="app-label">{label}</span>'
+          : '<div class="app-icon"><span class="app-label">{label}</span></div>'
+      )
+      .replace("{icon}", app.icon ? (await acode.toInternalUrl(app.icon)) : null)
       .replace("{label}", app.label)
   }
 
@@ -127,7 +137,7 @@ export class BetterAppsLauncher {
 
     this._holdTimer = setTimeout(async () => {
       await this.showAppDialog(this._currentAppEl, this._currentAppIndex);
-    }, 1000);
+    }, 800);
   }
 
   onHoldEnd() {
@@ -147,13 +157,17 @@ export class BetterAppsLauncher {
     ]);
     if (!action) return;
     if (action === "remove") {
-      this.removeApp(appIndex);
+      await this.removeApp(appIndex);
     } else {
       await this.editApp(appIndex);
     }
   }
 
-  removeApp(index) {
+  async removeApp(index) {
+    if (this.config.shortcutApps[index]?.icon) {
+      await fs(this.config.shortcutApps[index]?.icon).delete();
+      delete this.config.shortcutApps[index].icon;
+    }
     this.config.shortcutApps.splice(index, 1);
     this.saveConfig();
     this.onSelectSidebarApp();
@@ -162,15 +176,32 @@ export class BetterAppsLauncher {
   async editApp(appIndex) {
     const app = this.config.shortcutApps[appIndex];
     const action = await Select("Edit App", [
-      { text: "Change Label", value: "label" }
+      { text: "Change Label", value: "label" },
+      { text: `${app.icon ? "Remove" : "Add"} Custom Icon`, value: `icon-${app.icon ? "remove" : "add"}` }
     ]);
     if (!action) return;
     if (action === "label") {
-      const newLabel = Prompt("Label", app.packageName, "text", { required: true });
+      const newLabel = await Prompt("Label", app.packageName, "text", { required: true });
       this.config.shortcutApps[appIndex].label = newLabel;
-      this.saveConfig();
-      this.onSelectSidebarApp();
+    } else if (action === "icon-remove") {
+      await fs(app.icon).delete();
+      delete this.config.shortcutApps[appIndex].icon;
+    } else if (action === "icon-add") {
+      const icon = await FileBrowser("file", "Choose app icon");
+
+      const iconDirPath = PLUGIN_DIR + "/" + PLUGIN.id;
+      const iconFileName = app.packageName + "-" + icon.name;
+      const iconPath = iconDirPath + "/" + iconFileName;
+
+      const iconfs = fs(icon.url);
+      const dirfs = fs(iconDirPath);
+      await dirfs.createFile(iconFileName, "");
+
+      await fs(iconPath).writeFile((await iconfs.readFile()));
+      this.config.shortcutApps[appIndex].icon = iconPath;
     }
+    this.saveConfig();
+    this.onSelectSidebarApp();
   }
 
   async onClickApp(e) {
@@ -201,6 +232,13 @@ export class BetterAppsLauncher {
       case "floating":
         this.config.floatingNewApp = !this.config.floatingNewApp;
         if (this.config.floatingNewApp) appEl.classList.add("active")
+        else appEl.classList.remove("active")
+        this.saveConfig();
+        this.onSelectSidebarApp();
+        break;
+      case "hide-labels":
+        this.config.hideLabels = !this.config.hideLabels;
+        if (this.config.hideLabels) appEl.classList.add("active")
         else appEl.classList.remove("active")
         this.saveConfig();
         this.onSelectSidebarApp();

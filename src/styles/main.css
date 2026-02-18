@@ -62,6 +62,7 @@
   width: 3rem;
 }
 
+/* ── Shared app-icon base (both img and div) ── */
 .better-apps-launcher .apps-list li:not([is-floating="true"]) .app-icon {
   border-radius: .5rem;
   height: 2.5rem;
@@ -73,24 +74,35 @@
   background-position: center;
   position: relative;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
-.better-apps-launcher .apps-list li:not([is-floating="true"]) .app-icon::before {
+.better-apps-launcher .apps-list li:not([is-floating="true"]) img.app-icon {
+  object-fit: cover;
+}
+
+.better-apps-launcher .apps-list li:not([is-floating="true"]) img.app-icon::before {
+  display: none;
+}
+
+.better-apps-launcher .apps-list li:not([is-floating="true"]) div.app-icon {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.better-apps-launcher .apps-list li:not([is-floating="true"]) div.app-icon::before {
   content: "";
   position: absolute;
   inset: 0;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  background: rgba(255,255,255,0.18);
+  background: rgba(255, 255, 255, 0.18);
   opacity: .5;
   pointer-events: none;
 }
 
-.better-apps-launcher .apps-list li:not([is-floating="true"]) .app-label {
-  display: block;
-  width: 100%;
-  height: 100%;
-  font-size: .5rem;
+.better-apps-launcher .apps-list li:not([is-floating="true"]) div.app-icon .app-label {
+  font-size: .45rem;
   line-height: 1.2;
   white-space: normal;
   overflow: hidden;
@@ -100,8 +112,30 @@
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   word-break: break-word;
-  padding: 0.2rem;
+  padding: 0.15rem;
   margin: auto;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.better-apps-launcher .apps-list li:not([is-floating="true"]) img.app-icon + .app-label {
+  display: block;
+  width: 100%;
+  font-size: .5rem;
+  line-height: 1;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+  margin: auto;
+}
+
+.better-apps-launcher .apps-list[hide-labels="active"] li:not([is-floating="true"]) img.app-icon + .app-label {
+  display: none;
 }
 
 .better-apps-launcher .apps-list li.new-app[is-floating="false"] .app-icon {
