@@ -45,7 +45,7 @@ Tap any app icon in the launcher panel to open it immediately.
 | Button | Description |
 |--------|-------------|
 | Sort A–Z | Toggles alphabetical sorting of apps |
-| Floating | Toggles the floating position of the "New App" button |
+| Hide Labels | When toggles it's hides the label of apps who have icons |
 
 ## Permissions
 

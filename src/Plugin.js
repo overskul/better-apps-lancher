@@ -9,6 +9,7 @@ const Select = acode.require('select');
 const Prompt = acode.require('prompt');
 const fs = acode.require('fs');
 const FileBrowser = acode.require('fileBrowser');
+const AURL = acode.require("URL");
 
 export class BetterAppsLauncher {
   static SIDEBAR_APP_ID = "better-apps-launcher";
@@ -177,20 +178,25 @@ export class BetterAppsLauncher {
     const app = this.config.shortcutApps[appIndex];
     const action = await Select("Edit App", [
       { text: "Change Label", value: "label" },
-      { text: `${app.icon ? "Remove" : "Add"} Custom Icon`, value: `icon-${app.icon ? "remove" : "add"}` }
+      { text: `${app.icon ? "Remove" : "Add"} Custom Icon`, value: `icon-${app.icon ? "remove" : "add"}` },
+      { text: "Change Activity", value: "activity" },
     ]);
     if (!action) return;
     if (action === "label") {
       const newLabel = await Prompt("Label", app.packageName, "text", { required: true });
       this.config.shortcutApps[appIndex].label = newLabel;
+    } else if (action === "activity") {
+      const newActivity = await Prompt("Activity", app.mainActivity, "text", { required: true });
+      this.config.shortcutApps[appIndex].mainActivity = newActivity;
     } else if (action === "icon-remove") {
       await fs(app.icon).delete();
       delete this.config.shortcutApps[appIndex].icon;
     } else if (action === "icon-add") {
       const icon = await FileBrowser("file", "Choose app icon");
+      if (!icon) return;
 
       const iconDirPath = PLUGIN_DIR + "/" + PLUGIN.id;
-      const iconFileName = app.packageName + "-" + icon.name;
+      const iconFileName = app.packageName + AURL.extname(icon.name);
       const iconPath = iconDirPath + "/" + iconFileName;
 
       const iconfs = fs(icon.url);
@@ -284,7 +290,7 @@ export class BetterAppsLauncher {
     const activity = await Executor.BackgroundExecutor.execute(`cmd package resolve-activity --user 0 --brief ${pack}`, true);
     return this.resolveActivity(activity.split("\n").pop());
   }
-  
+
   resolveActivity(activity) {
     activity = activity.trim();
 
