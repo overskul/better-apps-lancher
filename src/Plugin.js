@@ -10,6 +10,7 @@ const Prompt = acode.require('prompt');
 const fs = acode.require('fs');
 const FileBrowser = acode.require('fileBrowser');
 const AURL = acode.require("URL");
+const MultiPrompt = acode.require("multiprompt");
 
 export class BetterAppsLauncher {
   static SIDEBAR_APP_ID = "better-apps-launcher";
@@ -263,10 +264,15 @@ export class BetterAppsLauncher {
   }
 
   async addApp() {
+    const installedApps = await this.getInstallAppsList();
     const packageName = await Select(
       "Select app to be added in the launcher",
-      await this.getInstallAppsList());
+      [
+        "CREATE CUSTOM APP",
+        ...installedApps,
+      ]);
     if (!packageName) return;
+    if (packageName === "CREATE CUSTOM APP") return this.createCustomApp();
     if (this.config.shortcutApps.find(s => s.packageName === packageName)) return;
 
     let activity = await this.getPackageActivity(packageName);
@@ -275,7 +281,45 @@ export class BetterAppsLauncher {
     this.config.shortcutApps.push({
       packageName: packageName,
       mainActivity: activity,
-      label: packageName.split(".").slice(1).join(".")
+      label: packageName //.split(".").slice(1).join(".")
+    });
+    this.saveConfig();
+    this.onSelectSidebarApp();
+  }
+
+  async createCustomApp() {
+    const prompt = await MultiPrompt(
+      "Create App Shortcut",
+      [
+        {
+          type: "text",
+          id: "packageName",
+          required: true,
+          placeholder: "Package name (ex: com.termux)"
+        },
+        {
+          type: "text",
+          id: "activity",
+          required: true,
+          placeholder: "Activity name (ex: com.termux.app.TermuxActivity)"
+        },
+        {
+          type: "text",
+          id: "label",
+          placeholder: "Label name (optional, default: Package name)"
+        },
+      ]
+    );
+    if (!prompt) return;
+    const { packageName, activity, label } = prompt;
+
+    if (!packageName || !activity) return;
+    if (this.config.shortcutApps.find(s => s.packageName === packageName)) return;
+
+    this.config.shortcutApps.push({
+      packageName: packageName,
+      mainActivity: activity,
+      label: label || packageName
     });
     this.saveConfig();
     this.onSelectSidebarApp();
